@@ -28,7 +28,7 @@ struct ContentView: View {
     @State private var answerState: Answer = .none
     @State private var correctCount: Int = 0
     @State private var wrongCount: Int = 0
-    @State private var attempCount : Int = 0
+    @State private var attemptCount : Int = 0
     @State private var showSummary: Bool = false
     @State private var timeRemaining: Int = 5
     @State private var timer: Timer? = nil
@@ -58,9 +58,54 @@ struct ContentView: View {
                     Text("Prime")
                         .font(.custom("Zapf Chancery", size: 36))
                 }
+                .disabled(answered)
+                .padding(.bottom, 24)
+                
+                // not prime
+                Button(action: {handleAnswer(userSaysPrime: false)}){
+                    Text("Not Prime")
+                        .font(.custom("Zapf Chancery", size: 36))
+                }
+                .disabled(answered)
+                
+                // result icon
+                ZStack{
+                    if answerState == .correct{
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 60, weight: .bold))
+                            .foregroundColor(Color.green)
+                            .transition(.scale.combined(with: .opacity))
+                    }else if answerState == .wrong{
+                        Image(systemName: "xmark")
+                            .font(.system(size: 60, weight: .bold))
+                            .foregroundColor(Color.red)
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                }
+                .frame(height: 100)
+                .animation(.spring(response: 0.4, dampingFraction: 0.6),value: answerState)
+                Spacer()
+                
+                // score
+                
+                HStack{
+                    Text("✅ \(correctCount)     ❌ \(wrongCount)")
+                        .font( .system(size: 15, weight: .medium, design: .rounded))
+                        .foregroundColor(.gray)
+                        .padding(.leading, 24)
+                        .padding(.bottom, 20)
+                }
+                Spacer()
+                Text("Attempt \(attemptCount)")
+                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                    .foregroundColor(.gray)
+                    .padding(.trailing, 24)
+                    .padding(.bottom, 20)
+                
             }
             
         }
+        
         
     }
     private func handleAnswer(userSaysPrime: Bool){
@@ -76,7 +121,7 @@ struct ContentView: View {
         
         }
     }
-}
+
 
 #Preview {
     ContentView()
