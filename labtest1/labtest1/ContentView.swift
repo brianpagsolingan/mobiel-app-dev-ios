@@ -105,7 +105,17 @@ struct ContentView: View {
             }
             
         }
-        
+        .onAppear{startTimer()}
+        .alert("Round Complete! ", isPresented: $showSummary){
+            Button("Play Again"){
+                correctCount = 0
+                wrongCount = 0
+                showSummary = false
+                nextNumber()
+            }
+        } message:{
+           Text( "Your score is: \(correctCount) / 10")
+        }
         
     }
     private func handleAnswer(userSaysPrime: Bool){
@@ -118,8 +128,56 @@ struct ContentView: View {
             answerState = correct ? .correct : . wrong
         }
         if correct{ correctCount += 1} else {wrongCount += 1}
+        attemptCount += 1
+        
+        checkMilestone()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+            if !showSummary{
+                nextNumber()
+            }
+        }
         
         }
+    
+    private func checkMilestone(){
+        if attemptCount % 10 == 0{
+            showSummary = true
+        }
+    }
+    
+    private func nextNumber(){
+        withAnimation{
+            answerState = .none
+        }
+        answered = false
+        currentNumber = Int.random(in: 1...100)
+        timeRemaining = 5
+        startTimer()
+    }
+    
+    private func startTimer(){
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) {_ in
+            if timeRemaining > 1{
+                timeRemaining -= 1
+            }else{
+                // ran out of time
+                timer?.invalidate()
+                answered = true
+                withAnimation{
+                    answerState = .wrong
+                }
+                wrongCount += 1
+                attemptCount += 1
+                checkMilestone()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+                    if !showSummary{nextNumber()}
+                }
+            }
+            
+        }
+    }
     }
 
 
