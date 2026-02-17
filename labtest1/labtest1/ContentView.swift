@@ -24,14 +24,57 @@ enum Answer{
 }
 
 struct ContentView: View {
+    @State private var currentNumber: Int = Int.random(in: 1...100)
+    @State private var answerState: Answer = .none
+    @State private var correctCount: Int = 0
+    @State private var wrongCount: Int = 0
+    @State private var attempCount : Int = 0
+    @State private var showSummary: Bool = false
+    @State private var timeRemaining: Int = 5
+    @State private var timer: Timer? = nil
+    @State private var answered: Bool = false
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        ZStack{
+            Color.white.ignoresSafeArea()
+            VStack(spacing: 0){
+                //timer
+                HStack{
+                    Spacer()
+                    Text("⏰ \(timeRemaining)s")
+                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                        .foregroundColor(timeRemaining <= 2 ? .red : .gray)
+                        .padding(.trailing, 24)
+                        .padding(.top, 16)
+                }
+                Spacer()
+                
+                // number display
+                Text("\(currentNumber)")
+                    .font(.custom("Zapf Chancery", size: 90))
+                    .padding(.bottom, 60)
+                
+                // prime button
+                Button(action: {handleAnswer(userSaysPrime: true)}){
+                    Text("Prime")
+                        .font(.custom("Zapf Chancery", size: 36))
+                }
+            }
+            
         }
-        .padding()
+        
+    }
+    private func handleAnswer(userSaysPrime: Bool){
+        guard !answered else {return}
+        answered = true
+        timer?.invalidate()
+        
+        let correct = isPrime(currentNumber) == userSaysPrime
+        withAnimation{
+            answerState = correct ? .correct : . wrong
+        }
+        if correct{ correctCount += 1} else {wrongCount += 1}
+        
+        }
     }
 }
 
